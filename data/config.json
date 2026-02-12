@@ -1,10 +1,11 @@
 {
   "brandName": "Kathia G.",
   "runwayTitle": "Digital Showroom",
+  "heroImage": "assets/images/hero-costa.jpg",
   "contact": {
     "mode": "whatsapp",
     "whatsapp": {
-      "phoneE164": "+50370000000",
+      "phoneE164": "+50376014154",
       "prefill": "Hola Kathia, me interesa: {name}. ¿Está disponible?"
     },
     "instagram": {
