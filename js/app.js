@@ -100,8 +100,8 @@ function closeModal(){
 
 async function initRunway(){
   const [config, products] = await Promise.all([
-    loadJSON("/data/config.json"),
-    loadJSON("/data/products.json")
+    loadJSON("./data/config.json"),
+    loadJSON("./data/products.json")
   ]);
 
   // title
