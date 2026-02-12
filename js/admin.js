@@ -70,6 +70,115 @@ function download(filename, content, mime="application/json"){
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
 }
 
+// ---------------------------
+// Image uploader (no backend)
+// ---------------------------
+const pendingImages = []; // { file, suggestedPath }
+
+function toSafe(s){
+  return (s || "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9.\-_]/g, "");
+}
+
+function setupImageUploader(){
+  const dropzone = $("#dropzone");
+  const browseBtn = $("#browseBtn");
+  const fileInput = $("#fileInput");
+  const uploadList = $("#uploadList");
+  const downloadImagesBtn = $("#downloadImagesBtn");
+  const imagesField = $("#f_images");
+
+  if(!dropzone || !browseBtn || !fileInput || !uploadList || !downloadImagesBtn || !imagesField) return;
+
+  const slugField = $("#f_id");
+
+  const renderUploadList = () => {
+    uploadList.innerHTML = pendingImages.map((x, i) => `
+      <div class="upload-item">
+        <div>
+          <div><strong>${escapeHtml(x.file.name)}</strong></div>
+          <code>${escapeHtml(x.suggestedPath)}</code>
+        </div>
+        <button class="btn ghost" type="button" data-remove="${i}">Quitar</button>
+      </div>
+    `).join("");
+
+    $$("[data-remove]", uploadList).forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.getAttribute("data-remove"));
+        pendingImages.splice(idx, 1);
+        imagesField.value = pendingImages.map(x => x.suggestedPath).join("\n");
+        renderUploadList();
+      });
+    });
+  };
+
+  const addFiles = (files) => {
+    const slug = toSafe(slugField?.value || "prenda") || "prenda";
+
+    [...files].forEach(file => {
+      if(!file.type.startsWith("image/")) return;
+
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const base = toSafe(file.name.replace(/\.[^/.]+$/, "")) || "foto";
+      const filename = `${slug}-${base}.${ext}`.replace(/-+/g, "-");
+
+      const suggestedPath = `assets/images/${filename}`;
+      pendingImages.push({ file, suggestedPath });
+    });
+
+    imagesField.value = pendingImages.map(x => x.suggestedPath).join("\n");
+    renderUploadList();
+  };
+
+  browseBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", () => addFiles(fileInput.files));
+
+  ["dragenter","dragover"].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.add("dragover");
+    });
+  });
+
+  ["dragleave","drop"].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.remove("dragover");
+    });
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    addFiles(e.dataTransfer.files);
+  });
+
+  downloadImagesBtn.addEventListener("click", async () => {
+    if(!pendingImages.length) return alert("No hay fotos pendientes.");
+    if(!window.JSZip) return alert("JSZip no cargó. Revisa el script en admin.html.");
+
+    const zip = new JSZip();
+    const folder = zip.folder("assets").folder("images");
+
+    for(const item of pendingImages){
+      const buf = await item.file.arrayBuffer();
+      const filename = item.suggestedPath.replace("assets/images/", "");
+      folder.file(filename, buf);
+    }
+
+    const blob = await zip.generateAsync({type:"blob"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "kathia-pasarela-images.zip";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  });
+}
+
 async function initAdmin(){
   const [config, products0] = await Promise.all([
     loadJSON("./data/config.json"),
@@ -84,11 +193,9 @@ async function initAdmin(){
 
   const tableBody = $("#tableBody");
   const editor = $("#editor");
-  const codebox = $("#jsonBox");
 
   function refresh(){
     tableBody.innerHTML = products.map(p => renderRow(p, labels)).join("");
-    codebox.value = JSON.stringify(products, null, 2);
   }
 
   function openEditor(p){
@@ -103,7 +210,16 @@ async function initAdmin(){
     $("#f_price_mode").value = p?.price?.mode || "hidden";
     $("#f_price_value").value = typeof p?.price?.value === "number" ? p.price.value : 0;
     $("#f_price_currency").value = p?.price?.currency || "USD";
-    $("#f_images").value = (p?.images || []).join("\n");
+
+    // Keep any uploader-filled value if user is in the middle of adding images,
+    // otherwise load from product
+    const fImages = $("#f_images");
+    if(fImages){
+      if(!fImages.value || fImages.value.trim() === ""){
+        fImages.value = (p?.images || []).join("\n");
+      }
+    }
+
     $("#f_description").value = p?.description || "";
     editor.scrollIntoView({behavior:"smooth", block:"start"});
   }
@@ -151,24 +267,21 @@ async function initAdmin(){
     }
   });
 
-  $("#newBtn").addEventListener("click", () => openEditor(null));
+  $("#newBtn").addEventListener("click", () => {
+    // Clear images field for a clean new product
+    const fImages = $("#f_images");
+    if(fImages) fImages.value = "";
+    openEditor(null);
+  });
+
   $("#saveBtn").addEventListener("click", () => upsertFromForm());
+
   $("#downloadBtn").addEventListener("click", () => {
     download("products.json", JSON.stringify(products, null, 2));
   });
 
-  $("#replaceFromJsonBtn").addEventListener("click", () => {
-    try{
-      const parsed = JSON.parse(codebox.value);
-      if(!Array.isArray(parsed)) throw new Error("products.json debe ser un arreglo []");
-      products = parsed.map(normalize);
-      editingId = null;
-      refresh();
-      alert("Listo. Ahora descarga products.json y reemplázalo en /data.");
-    }catch(err){
-      alert(`Error: ${err.message}`);
-    }
-  });
+  // enable uploader
+  setupImageUploader();
 
   // initial
   refresh();
