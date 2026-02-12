@@ -1,11 +1,11 @@
 [
   {
-    "id": "top-tejido-oro",
-    "name": "Perla",
+    "id": "arena",
+    "name": "Arena Negra",
     "subtitle": "Detalle dorado",
     "materials": "Hilo + detalle",
     "sizes": "S / M",
-    "status": "available",
+    "status": "loom",
     "price": {
       "mode": "hidden",
       "value": 80,
@@ -13,7 +13,7 @@
     },
     "description": "Top de crochet con detalle de brillo sutil.",
     "images": [
-      "assets/images/top-tejido-oro-perla.jpg"
+      "assets/images/arena-arena.jpg"
     ]
   }
 ]
