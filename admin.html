@@ -6,153 +6,148 @@
   <title>Backstage • Digital Showroom</title>
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-<body>
+
+<body data-page="admin">
+
   <header class="topbar">
     <div class="container topbar-inner">
       <div class="brand">
         <h1 id="brandName">Showroom</h1>
-        <span class="small muted">Backstage</span>
+        <span class="small muted" id="brandSubtitle"></span>
       </div>
       <nav class="nav">
-        <a href="./">Runway</a>
+        <a href="./index.html">Runway</a>
         <a class="active" href="./admin.html">Backstage</a>
+        <a class="btn primary" id="primaryCTA" href="#" target="_blank" rel="noopener">Contactar</a>
       </nav>
     </div>
   </header>
 
-  <main class="container bs-shell">
-    <div class="bs-title">
-      <div>
-        <h2>Gestión de prendas</h2>
-        <div class="small muted">Editas el catálogo aquí. Luego descargas el archivo y lo reemplazas en /data.</div>
+  <main class="container">
+
+    <section class="hero">
+      <div class="hero-media">
+        <img id="heroImg" alt="" style="display:none" onload="this.style.display='block'">
       </div>
-      <div class="row">
-        <button class="btn primary" id="newBtn" type="button">Nueva prenda</button>
-        <button class="btn" id="downloadBtn" type="button">Descargar catálogo</button>
+      <div class="hero-overlay">
+        <div>
+          <h2>Nahual</h2>
+          <p>Hechas por manos salvadoreñas.</p>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- IMPORTANT: Editor first, catalogue second -->
-    <div class="grid bs-grid" style="grid-template-columns: 1.2fr .8fr; gap:18px">
-
-      <!-- Editor FIRST -->
-      <div>
-        <div class="pane" id="editor">
-          <div class="spread">
-            <strong id="edTitle">Editar prenda</strong>
-            <span class="small muted">Backstage</span>
-          </div>
-
-          <hr class="sep" />
-
-          <div class="formgrid">
-            <div>
-              <div class="label">ID (slug)</div>
-              <input class="input" id="f_id" placeholder="vestido-arena" />
-            </div>
-            <div>
-              <div class="label">Nombre</div>
-              <input class="input" id="f_name" placeholder="Vestido Arena" />
-            </div>
-
-            <div>
-              <div class="label">Subtítulo</div>
-              <input class="input" id="f_subtitle" placeholder="Algodón natural" />
-            </div>
-            <div>
-              <div class="label">Materiales</div>
-              <input class="input" id="f_materials" placeholder="Algodón / tejido artesanal" />
-            </div>
-
-            <div>
-              <div class="label">Talla o medidas</div>
-              <input class="input" id="f_sizes" placeholder="S / M / L" />
-            </div>
-            <div>
-              <div class="label">Disponibilidad</div>
-              <select class="input" id="f_status">
-                <option value="available">Disponible</option>
-                <option value="loom">En Telar</option>
-                <option value="archived">Archivo</option>
-              </select>
-            </div>
-
-            <div>
-              <div class="label">Precio (modo)</div>
-              <select class="input" id="f_price_mode">
-                <option value="hidden">Bajo consulta</option>
-                <option value="visible">Visible</option>
-              </select>
-            </div>
-            <div>
-              <div class="label">Precio (valor)</div>
-              <input class="input" id="f_price_value" type="number" min="0" step="1" value="0" />
-            </div>
-
-            <div>
-              <div class="label">Moneda</div>
-              <input class="input" id="f_price_currency" value="USD" />
-            </div>
-
-            <!-- Uploader (drag/drop + browse) -->
-            <div>
-              <div class="label">Fotos</div>
-
-              <div id="dropzone" class="dropzone">
-                Arrastra fotos aquí o
-                <button type="button" class="link" id="browseBtn">selecciona archivos</button>
-                <input id="fileInput" type="file" accept="image/*" multiple style="display:none" />
-              </div>
-
-              <div id="uploadList" class="upload-list"></div>
-
-              <div class="row" style="margin-top:10px;justify-content:flex-end">
-                <button class="btn" id="downloadImagesBtn" type="button">Descargar fotos (.zip)</button>
-              </div>
-
-              <!-- Hidden-ish: we keep images field but make it readonly and auto-filled -->
-              <div style="margin-top:10px">
-                <div class="label">Rutas de imágenes (automático)</div>
-                <textarea class="input textarea" id="f_images" readonly placeholder="assets/images/mi-foto.jpg"></textarea>
-                <div class="small muted" style="margin-top:6px">
-                  Nota: las rutas deben comenzar con <strong>assets/</strong> (sin “/” al inicio).
-                </div>
-              </div>
-            </div>
-
-            <div style="grid-column:1/-1">
-              <div class="label">Descripción</div>
-              <textarea class="input textarea" id="f_description" placeholder="Descripción breve"></textarea>
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:12px;justify-content:flex-end">
-            <button class="btn primary" id="saveBtn" type="button">Guardar</button>
-          </div>
-
-          <div class="note" style="margin-top:12px">
-            Para publicar cambios: descarga el catálogo y reemplázalo en <strong>/data/products.json</strong> en tu repo.
-          </div>
+    <section class="section">
+      <div class="section-title">
+        <h3>Gestión de prendas</h3>
+        <div class="controls">
+          <button id="newBtn" class="btn">Nueva prenda</button>
+          <button id="downloadBtn" class="btn ghost">Descargar catálogo</button>
         </div>
       </div>
 
-      <!-- Catalogue SECOND -->
-      <div>
-        <table class="table" aria-label="Listado de prendas">
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="table">
           <tbody id="tableBody"></tbody>
         </table>
       </div>
+    </section>
 
-    </div>
+    <!-- Editor -->
+    <section id="editor" class="section">
+      <h3 id="edTitle">Editar prenda</h3>
 
-    <footer class="footer">
-      <div class="muted">Backstage es para gestión del catálogo. Runway es público.</div>
-    </footer>
+      <div class="form-grid">
+
+        <div>
+          <label>ID (slug)</label>
+          <input id="f_id" class="input" />
+        </div>
+
+        <div>
+          <label>Nombre</label>
+          <input id="f_name" class="input" />
+        </div>
+
+        <div>
+          <label>Subtítulo</label>
+          <input id="f_subtitle" class="input" />
+        </div>
+
+        <div>
+          <label>Materiales</label>
+          <input id="f_materials" class="input" />
+        </div>
+
+        <div>
+          <label>Talla o medidas</label>
+          <input id="f_sizes" class="input" />
+        </div>
+
+        <div>
+          <label>Disponibilidad</label>
+          <select id="f_status" class="input">
+            <option value="available">Disponible</option>
+            <option value="loom">En Telar</option>
+            <option value="archived">Archivo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Precio (modo)</label>
+          <select id="f_price_mode" class="input">
+            <option value="hidden">Bajo consulta</option>
+            <option value="visible">Visible</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Precio (valor)</label>
+          <input id="f_price_value" type="number" class="input" />
+        </div>
+
+        <div>
+          <label>Moneda</label>
+          <input id="f_price_currency" class="input" />
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label>Fotos (una ruta por línea)</label>
+          <textarea id="f_images" class="input" rows="3"></textarea>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label>Descripción</label>
+          <textarea id="f_description" class="input" rows="3"></textarea>
+        </div>
+
+      </div>
+
+      <div style="margin-top:20px;">
+        <button id="saveBtn" class="btn primary">Guardar</button>
+      </div>
+
+      <p class="small muted" style="margin-top:12px;">
+        Para publicar cambios: descarga el catálogo y reemplázalo en <strong>/data/products.json</strong> en tu repo.
+      </p>
+
+    </section>
+
   </main>
 
-  <!-- JSZip for downloading images as a zip -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <footer class="footer">
+    <div class="spread">
+      <div>© <span id="year"></span> <span class="muted">Digital Showroom</span></div>
+      <div class="muted">Demo estático • GitHub Pages</div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 
   <script src="./js/admin.js"></script>
+
 </body>
 </html>
