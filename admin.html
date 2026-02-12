@@ -24,21 +24,18 @@
     <div class="bs-title">
       <div>
         <h2>Gestión de prendas</h2>
-        <div class="small muted">Edición local para demo. Al final descargas products.json y lo reemplazas en /data.</div>
+        <div class="small muted">Editas el catálogo aquí. Luego descargas el archivo y lo reemplazas en /data.</div>
       </div>
       <div class="row">
         <button class="btn primary" id="newBtn" type="button">Nueva prenda</button>
-        <button class="btn" id="downloadBtn" type="button">Descargar products.json</button>
+        <button class="btn" id="downloadBtn" type="button">Descargar catálogo</button>
       </div>
     </div>
 
-    <div class="grid" style="grid-template-columns: 1.2fr .8fr; gap:18px">
-      <div>
-        <table class="table" aria-label="Listado de prendas">
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
+    <!-- IMPORTANT: Editor first, catalogue second -->
+    <div class="grid bs-grid" style="grid-template-columns: 1.2fr .8fr; gap:18px">
 
+      <!-- Editor FIRST -->
       <div>
         <div class="pane" id="editor">
           <div class="spread">
@@ -96,9 +93,31 @@
               <div class="label">Moneda</div>
               <input class="input" id="f_price_currency" value="USD" />
             </div>
+
+            <!-- Uploader (drag/drop + browse) -->
             <div>
-              <div class="label">Imágenes (una por línea)</div>
-              <textarea class="input textarea" id="f_images" placeholder="/assets/images/mi-foto.jpg"></textarea>
+              <div class="label">Fotos</div>
+
+              <div id="dropzone" class="dropzone">
+                Arrastra fotos aquí o
+                <button type="button" class="link" id="browseBtn">selecciona archivos</button>
+                <input id="fileInput" type="file" accept="image/*" multiple style="display:none" />
+              </div>
+
+              <div id="uploadList" class="upload-list"></div>
+
+              <div class="row" style="margin-top:10px;justify-content:flex-end">
+                <button class="btn" id="downloadImagesBtn" type="button">Descargar fotos (.zip)</button>
+              </div>
+
+              <!-- Hidden-ish: we keep images field but make it readonly and auto-filled -->
+              <div style="margin-top:10px">
+                <div class="label">Rutas de imágenes (automático)</div>
+                <textarea class="input textarea" id="f_images" readonly placeholder="assets/images/mi-foto.jpg"></textarea>
+                <div class="small muted" style="margin-top:6px">
+                  Nota: las rutas deben comenzar con <strong>assets/</strong> (sin “/” al inicio).
+                </div>
+              </div>
             </div>
 
             <div style="grid-column:1/-1">
@@ -111,25 +130,28 @@
             <button class="btn primary" id="saveBtn" type="button">Guardar</button>
           </div>
 
-          <hr class="sep" />
-
-          <div class="label">products.json (vista previa)</div>
-          <textarea class="input codebox" id="jsonBox"></textarea>
-          <div class="row" style="margin-top:10px;justify-content:flex-end">
-            <button class="btn" id="replaceFromJsonBtn" type="button">Reemplazar desde JSON</button>
-          </div>
-
-          <div class="note" style="margin-top:10px">
-            Nota: GitHub Pages no puede escribir archivos en el servidor. Para publicar cambios: descarga el archivo y reemplázalo en /data/products.json en tu repo.
+          <div class="note" style="margin-top:12px">
+            Para publicar cambios: descarga el catálogo y reemplázalo en <strong>/data/products.json</strong> en tu repo.
           </div>
         </div>
       </div>
+
+      <!-- Catalogue SECOND -->
+      <div>
+        <table class="table" aria-label="Listado de prendas">
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
     </div>
 
     <footer class="footer">
       <div class="muted">Backstage es para gestión del catálogo. Runway es público.</div>
     </footer>
   </main>
+
+  <!-- JSZip for downloading images as a zip -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <script src="./js/admin.js"></script>
 </body>
