@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backstage • Digital Showroom</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <h1 id="brandName">Showroom</h1>
+        <span class="small muted">Backstage</span>
+      </div>
+      <nav class="nav">
+        <a href="/">Runway</a>
+        <a class="active" href="/admin.html">Backstage</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container bs-shell">
+    <div class="bs-title">
+      <div>
+        <h2>Gestión de prendas</h2>
+        <div class="small muted">Edición local para demo. Al final descargas products.json y lo reemplazas en /data.</div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="newBtn" type="button">Nueva prenda</button>
+        <button class="btn" id="downloadBtn" type="button">Descargar products.json</button>
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1.2fr .8fr; gap:18px">
+      <div>
+        <table class="table" aria-label="Listado de prendas">
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="pane" id="editor">
+          <div class="spread">
+            <strong id="edTitle">Editar prenda</strong>
+            <span class="small muted">Backstage</span>
+          </div>
+
+          <hr class="sep" />
+
+          <div class="formgrid">
+            <div>
+              <div class="label">ID (slug)</div>
+              <input class="input" id="f_id" placeholder="vestido-arena" />
+            </div>
+            <div>
+              <div class="label">Nombre</div>
+              <input class="input" id="f_name" placeholder="Vestido Arena" />
+            </div>
+
+            <div>
+              <div class="label">Subtítulo</div>
+              <input class="input" id="f_subtitle" placeholder="Algodón natural" />
+            </div>
+            <div>
+              <div class="label">Materiales</div>
+              <input class="input" id="f_materials" placeholder="Algodón / tejido artesanal" />
+            </div>
+
+            <div>
+              <div class="label">Talla o medidas</div>
+              <input class="input" id="f_sizes" placeholder="S / M / L" />
+            </div>
+            <div>
+              <div class="label">Disponibilidad</div>
+              <select class="input" id="f_status">
+                <option value="available">Disponible</option>
+                <option value="loom">En Telar</option>
+                <option value="archived">Archivo</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="label">Precio (modo)</div>
+              <select class="input" id="f_price_mode">
+                <option value="hidden">Bajo consulta</option>
+                <option value="visible">Visible</option>
+              </select>
+            </div>
+            <div>
+              <div class="label">Precio (valor)</div>
+              <input class="input" id="f_price_value" type="number" min="0" step="1" value="0" />
+            </div>
+
+            <div>
+              <div class="label">Moneda</div>
+              <input class="input" id="f_price_currency" value="USD" />
+            </div>
+            <div>
+              <div class="label">Imágenes (una por línea)</div>
+              <textarea class="input textarea" id="f_images" placeholder="/assets/images/mi-foto.jpg"></textarea>
+            </div>
+
+            <div style="grid-column:1/-1">
+              <div class="label">Descripción</div>
+              <textarea class="input textarea" id="f_description" placeholder="Descripción breve"></textarea>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px;justify-content:flex-end">
+            <button class="btn primary" id="saveBtn" type="button">Guardar</button>
+          </div>
+
+          <hr class="sep" />
+
+          <div class="label">products.json (vista previa)</div>
+          <textarea class="input codebox" id="jsonBox"></textarea>
+          <div class="row" style="margin-top:10px;justify-content:flex-end">
+            <button class="btn" id="replaceFromJsonBtn" type="button">Reemplazar desde JSON</button>
+          </div>
+
+          <div class="note" style="margin-top:10px">
+            Nota: GitHub Pages no puede escribir archivos en el servidor. Para publicar cambios: descarga el archivo y reemplázalo en /data/products.json en tu repo.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="muted">Backstage es para gestión del catálogo. Runway es público.</div>
+    </footer>
+  </main>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

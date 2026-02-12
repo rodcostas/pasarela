@@ -1,0 +1,19 @@
+{
+  "brandName": "Kathia G.",
+  "runwayTitle": "Digital Showroom",
+  "contact": {
+    "mode": "whatsapp",
+    "whatsapp": {
+      "phoneE164": "+50370000000",
+      "prefill": "Hola Kathia, me interesa: {name}. ¿Está disponible?"
+    },
+    "instagram": {
+      "handle": "kathia.g"
+    }
+  },
+  "labels": {
+    "available": "Disponible",
+    "loom": "En Telar",
+    "archived": "Archivo"
+  }
+}
