@@ -72,8 +72,8 @@ function download(filename, content, mime="application/json"){
 
 async function initAdmin(){
   const [config, products0] = await Promise.all([
-    loadJSON("/data/config.json"),
-    loadJSON("/data/products.json")
+    loadJSON("./data/config.json"),
+    loadJSON("./data/products.json")
   ]);
 
   const labels = config.labels || {available:"Disponible", loom:"En Telar", archived:"Archivo"};
