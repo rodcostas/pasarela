@@ -6,16 +6,19 @@
   <title>Backstage • Digital Showroom</title>
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-<body data-page="backstage">
+
+<body data-page="admin">
   <header class="topbar">
     <div class="container topbar-inner">
       <div class="brand">
         <h1 id="brandName">Showroom</h1>
-        <span class="small muted">Backstage</span>
+        <span class="small muted" id="brandSubtitle"></span>
       </div>
+
       <nav class="nav">
-        <a href="./">Runway</a>
+        <a href="./index.html">Runway</a>
         <a class="active" href="./admin.html">Backstage</a>
+        <a class="btn primary" id="primaryCTA" href="#" target="_blank" rel="noopener">Contactar</a>
       </nav>
     </div>
   </header>
@@ -24,7 +27,7 @@
     <div class="bs-title">
       <div>
         <h2>Gestión de prendas</h2>
-        <div class="small muted">Editas el catálogo aquí. Luego descargas el archivo y lo reemplazas en /data.</div>
+        <div class="small muted">Actualiza tu catálogo aquí. Para publicar cambios, descargas el archivo y lo reemplazas en <strong>/data/products.json</strong>.</div>
       </div>
       <div class="row">
         <button class="btn primary" id="newBtn" type="button">Nueva prenda</button>
@@ -92,9 +95,10 @@
             <input class="input" id="f_price_currency" value="USD" />
           </div>
 
-          <!-- Drag/drop area is handled by admin.js (if your current admin.js includes it) -->
+          <!-- Uploader -->
           <div>
             <div class="label">Fotos</div>
+
             <div id="dropzone" class="dropzone" tabindex="0">
               <div class="small muted">
                 Arrastra fotos aquí o <span class="linklike" id="pickFiles">selecciona archivos</span>
@@ -108,7 +112,7 @@
               <button class="btn" id="downloadImagesBtn" type="button">Descargar fotos (.zip)</button>
             </div>
 
-            <div class="label" style="margin-top:10px">Rutas de imágenes (automático)</div>
+            <div class="label" style="margin-top:10px">Rutas de imágenes</div>
             <textarea class="input textarea" id="f_images" placeholder="assets/images/mi-foto.jpg"></textarea>
             <div class="small muted" style="margin-top:6px">
               Nota: las rutas deben comenzar con <strong>assets/</strong> (sin “/” al inicio).
@@ -126,7 +130,7 @@
         </div>
 
         <div class="note" style="margin-top:12px">
-          Para publicar cambios: descarga el catálogo y reemplázalo en <strong>/data/products.json</strong> en tu repo.
+          Sugerencia: mantén los nombres de archivo simples (sin espacios) para que las rutas funcionen perfecto.
         </div>
       </section>
 
@@ -139,11 +143,11 @@
     </div>
 
     <footer class="footer">
-      <div class="muted">Backstage es para gestión del catálogo. Runway es público.</div>
+      <div class="muted">Backstage es privado. Runway es público.</div>
     </footer>
   </main>
 
-  <!-- JSZip for downloading images as a zip (your admin.js expects this if using zip) -->
+  <!-- JSZip for downloading images as a zip -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="./js/admin.js"></script>
 </body>
