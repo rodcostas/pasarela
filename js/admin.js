@@ -20,28 +20,59 @@ function uid() {
   return (crypto?.randomUUID?.() || `id-${Math.random().toString(16).slice(2)}`).slice(0, 24);
 }
 
+function toNumOrNull(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && String(v).trim() !== "" ? n : null;
+}
+
 function normalize(p) {
+  const price = p.price || {};
+  const images = Array.isArray(p.images) ? p.images : (p.images ? [p.images] : []);
+
   return {
     id: p.id || uid(),
-    name: p.name || "",
-    subtitle: p.subtitle || "",
-    materials: p.materials || "",
-    sizes: p.sizes || "",
-    status: p.status || "available",
-    price: p.price || { mode: "hidden", value: 0, currency: "USD" },
-    description: p.description || "",
-    images: Array.isArray(p.images) ? p.images : (p.images ? [p.images] : []),
+    collection: (p.collection || "").toString(),
+    category: (p.category || "women").toString(), // women | men | accessory
+    name: (p.name || "").toString(),
+    subtitle: (p.subtitle || "").toString(),
+    materials: (p.materials || "").toString(),
+    sizes: (p.sizes || "").toString(),
+    technique: (p.technique || "").toString(),
+    status: (p.status === "loom" ? "loom" : "available"), // keep only available/loom in UI
+    hours: typeof p.hours === "number" ? p.hours : (p.hours == null ? null : toNumOrNull(p.hours)),
+    price: {
+      mode: (price.mode === "visible" ? "visible" : "hidden"),
+      value: typeof price.value === "number" ? price.value : (price.value == null ? null : toNumOrNull(price.value)),
+      currency: (price.currency || "USD").toString() || "USD",
+    },
+    description: (p.description || "").toString(),
+    images,
   };
 }
 
 function statusLabel(status, labels) {
-  const map = { available: labels.available, loom: labels.loom, archived: labels.archived };
+  const map = {
+    available: labels.available,
+    loom: labels.loom,
+  };
   return map[status] || status;
+}
+
+function categoryLabel(cat) {
+  const map = {
+    women: "Mujer",
+    men: "Hombre",
+    accessory: "Accesorio",
+  };
+  return map[cat] || cat;
 }
 
 function renderRow(p, labels) {
   const img = p.images?.[0] || "";
   const sub = p.subtitle || p.materials || "";
+  const col = p.collection ? ` · ${p.collection}` : "";
+  const cat = categoryLabel(p.category);
+
   return `
     <tr class="tr" data-id="${escapeHtml(p.id)}">
       <td style="width:72px">
@@ -51,8 +82,9 @@ function renderRow(p, labels) {
         <div style="font-weight:600">${escapeHtml(p.name || "Sin nombre")}</div>
         <div class="small muted">${escapeHtml(sub)}</div>
       </td>
+      <td class="small muted" style="width:160px">${escapeHtml(cat + col)}</td>
       <td class="small muted" style="width:160px">${escapeHtml(statusLabel(p.status, labels))}</td>
-      <td style="width:160px">
+      <td style="width:180px">
         <div class="actions">
           <button class="btn" data-action="edit">Editar</button>
           <button class="btn ghost" data-action="delete">Eliminar</button>
@@ -74,7 +106,6 @@ function download(filename, content, mime = "application/json") {
 }
 
 function sanitizeFilename(name) {
-  // keep it predictable, URL-safe
   return name
     .toLowerCase()
     .replace(/\s+/g, "-")
@@ -88,7 +119,12 @@ async function initAdmin() {
     loadJSON("./data/products.json"),
   ]);
 
-  const labels = config.labels || { available: "Disponible", loom: "En Telar", archived: "Archivo" };
+  // Labels: IMPORTANT — make loom = "Hecho a pedido"
+  const labels = config.labels || {
+    available: "Disponible",
+    loom: "Hecho a pedido",
+  };
+
   const brandName = config.brandName || "Showroom";
   $("#brandName") && ($("#brandName").textContent = brandName);
 
@@ -106,6 +142,14 @@ async function initAdmin() {
     $("#edTitle").textContent = editingId ? "Editar prenda" : "Nueva prenda";
 
     $("#f_id").value = p?.id || "";
+
+    // NEW fields
+    if ($("#f_collection")) $("#f_collection").value = p?.collection || "";
+    if ($("#f_category")) $("#f_category").value = p?.category || "women";
+    if ($("#f_technique")) $("#f_technique").value = p?.technique || "";
+    if ($("#f_hours")) $("#f_hours").value = (p?.hours ?? "") === null ? "" : String(p?.hours ?? "");
+
+    // Existing fields
     $("#f_name").value = p?.name || "";
     $("#f_subtitle").value = p?.subtitle || "";
     $("#f_materials").value = p?.materials || "";
@@ -113,7 +157,7 @@ async function initAdmin() {
     $("#f_status").value = p?.status || "available";
 
     $("#f_price_mode").value = p?.price?.mode || "hidden";
-    $("#f_price_value").value = typeof p?.price?.value === "number" ? p.price.value : 0;
+    $("#f_price_value").value = typeof p?.price?.value === "number" ? p.price.value : (p?.price?.value ?? 0);
     $("#f_price_currency").value = p?.price?.currency || "USD";
 
     $("#f_images").value = (p?.images || []).join("\n");
@@ -123,16 +167,28 @@ async function initAdmin() {
   }
 
   function upsertFromForm() {
+    const id = $("#f_id").value.trim() || (editingId || uid());
+
     const p = normalize({
-      id: $("#f_id").value.trim() || (editingId || uid()),
+      id,
+
+      // NEW fields
+      collection: $("#f_collection") ? $("#f_collection").value.trim() : "",
+      category: $("#f_category") ? $("#f_category").value : "women",
+      technique: $("#f_technique") ? $("#f_technique").value.trim() : "",
+      hours: $("#f_hours") ? toNumOrNull($("#f_hours").value) : null,
+
+      // Existing
       name: $("#f_name").value.trim(),
       subtitle: $("#f_subtitle").value.trim(),
       materials: $("#f_materials").value.trim(),
       sizes: $("#f_sizes").value.trim(),
-      status: $("#f_status").value,
+      status: $("#f_status").value, // available | loom
       price: {
-        mode: $("#f_price_mode").value,
-        value: Number($("#f_price_value").value || 0),
+        mode: $("#f_price_mode").value, // hidden | visible
+        value: $("#f_price_mode").value === "hidden"
+          ? (toNumOrNull($("#f_price_value").value) ?? null) // keep if you want, but not shown
+          : (toNumOrNull($("#f_price_value").value) ?? 0),
         currency: $("#f_price_currency").value.trim() || "USD",
       },
       images: $("#f_images").value
@@ -154,6 +210,7 @@ async function initAdmin() {
   tableBody.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
+
     const tr = e.target.closest("tr");
     const id = tr?.getAttribute("data-id");
     const p = products.find((x) => x.id === id);
@@ -176,7 +233,7 @@ async function initAdmin() {
     download("products.json", JSON.stringify(products, null, 2));
   });
 
-  // ===== Uploader wiring (THIS is what you lost) =====
+  // ===== Uploader wiring =====
   const dropzone = $("#dropzone");
   const pickFiles = $("#pickFiles");
   const filePicker = $("#filePicker");
@@ -184,15 +241,16 @@ async function initAdmin() {
   const downloadImagesBtn = $("#downloadImagesBtn");
   const imagesTextarea = $("#f_images");
 
-  // in-memory stash of chosen files (since Pages can't upload)
   let picked = []; // [{file, path}]
 
   function renderPicked() {
     if (!fileList) return;
+
     if (!picked.length) {
       fileList.innerHTML = `<div class="small muted">No hay fotos seleccionadas todavía.</div>`;
       return;
     }
+
     fileList.innerHTML = `
       <div class="upload-list">
         ${picked.map((x, i) => `
@@ -207,7 +265,6 @@ async function initAdmin() {
       </div>
     `;
 
-    // also keep textarea synced
     imagesTextarea.value = picked.map((x) => x.path).join("\n");
   }
 
@@ -218,7 +275,6 @@ async function initAdmin() {
     for (const f of arr) {
       const safe = sanitizeFilename(f.name);
       const path = `assets/images/${safe}`;
-      // avoid duplicates by path
       if (!picked.some((x) => x.path === path)) {
         picked.push({ file: f, path });
       }
@@ -239,7 +295,6 @@ async function initAdmin() {
 
   filePicker?.addEventListener("change", (e) => {
     addFiles(e.target.files);
-    // reset so selecting same files again still triggers
     e.target.value = "";
   });
 
@@ -290,7 +345,6 @@ async function initAdmin() {
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   });
 
-  // initial render for uploader area
   renderPicked();
 
   // initial
