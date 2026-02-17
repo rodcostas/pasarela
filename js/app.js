@@ -7,25 +7,36 @@ async function loadJSON(path){
   return await res.json();
 }
 
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/**
+ * Normalize legacy fields so old data keeps working.
+ * - status: loom -> made_to_order
+ * - category: default women if missing
+ */
+function normalizeProduct(p){
+  const status = (p.status === "loom") ? "made_to_order" : (p.status || "available");
+  const category = p.category || "women"; // women | men | accessories
+  return { ...p, status, category };
+}
+
 function statusBadge(status, labels){
   const map = {
     available: {cls:"", text: labels.available},
-    loom: {cls:"loom", text: labels.loom},
+    made_to_order: {cls:"made", text: labels.made_to_order},
+    // keep archived supported for later; not shown unless used
     archived: {cls:"archived", text: labels.archived}
   };
   const v = map[status] || map.available;
   return `<span class="badge ${v.cls}"><span class="badge-dot"></span>${escapeHtml(v.text)}</span>`;
 }
 
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
 function contactUrl(product, config){
   const mode = config.contact?.mode || "whatsapp";
   if(mode === "instagram"){
     const handle = config.contact?.instagram?.handle || "";
-    // prefer deep link for app; web fallback
     return `https://instagram.com/${encodeURIComponent(handle)}`;
   }
   const phone = (config.contact?.whatsapp?.phoneE164 || "").replace(/[^\d+]/g, "");
@@ -58,7 +69,12 @@ function openModal(p, config){
   const backdrop = $("#modalBackdrop");
   const media = $("#modalMedia");
   const panel = $("#modalPanel");
-  const labels = config.labels || {available:"Disponible", loom:"En Telar", archived:"Archivo"};
+
+  const labels = config.labels || {
+    available: "Disponible",
+    made_to_order: "Hecho a pedido",
+    archived: "Archivo"
+  };
 
   const img = p.images?.[0] || "";
   media.innerHTML = img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : "";
@@ -99,48 +115,100 @@ function closeModal(){
 }
 
 async function initRunway(){
-  const [config, products] = await Promise.all([
+  const [config, productsRaw] = await Promise.all([
     loadJSON("./data/config.json"),
     loadJSON("./data/products.json")
   ]);
 
-  // title
+  // Title (if you still use these IDs elsewhere)
   const brand = $("#brandName");
   const subtitle = $("#brandSubtitle");
-  if(brand) brand.textContent = config.brandName || "Showroom";
+  if(brand) brand.textContent = config.brandName || "Kathia Galindo";
   if(subtitle) subtitle.textContent = config.runwayTitle || "";
 
   // hero image optional
   const heroImg = $("#heroImg");
   if(heroImg && config.heroImage) heroImg.src = config.heroImage;
 
-  const labels = config.labels || {available:"Disponible", loom:"En Telar", archived:"Archivo"};
+  // labels (new)
+  const labels = config.labels || {
+    available: "Disponible",
+    made_to_order: "Hecho a pedido",
+    archived: "Archivo"
+  };
 
-  // filter control
   const filter = $("#statusFilter");
   const grid = $("#grid");
-  const list = products.slice();
+
+  // Normalize legacy products
+  const list = productsRaw.map(normalizeProduct);
+
+  // Category pills (from index.html)
+  const pills = $$(".pill");
+  let activeCategory = document.body.dataset.category || "women";
+
+  function setActiveCategory(cat){
+    activeCategory = cat || "women";
+    document.body.dataset.category = activeCategory;
+
+    // update aria states (if pills exist)
+    pills.forEach(p => {
+      const on = p.dataset.category === activeCategory;
+      p.classList.toggle("active", on);
+      p.setAttribute("aria-selected", on ? "true" : "false");
+    });
+
+    apply();
+  }
+
+  // Listen to pill clicks
+  if(pills.length){
+    pills.forEach(btn => {
+      btn.addEventListener("click", () => setActiveCategory(btn.dataset.category));
+    });
+    // ensure one is active on load
+    const initial = pills.find(p => p.dataset.category === activeCategory) || pills[0];
+    if(initial) setActiveCategory(initial.dataset.category);
+  }
 
   function apply(){
     const v = filter?.value || "all";
-    const shown = v === "all" ? list : list.filter(p => p.status === v);
+
+    // first: category filter
+    let shown = list.filter(p => p.category === activeCategory);
+
+    // second: status filter
+    if(v !== "all"){
+      shown = shown.filter(p => p.status === v);
+    }
+
     grid.innerHTML = shown.map(p => renderCard(p, labels)).join("");
+
     // attach handlers
     $$(".card", grid).forEach(card => {
       const id = card.getAttribute("data-id");
-      const p = list.find(x => x.id === id);
+      const p = shown.find(x => x.id === id) || list.find(x => x.id === id);
+      if(!p) return;
+
       const open = () => openModal(p, config);
       card.addEventListener("click", open);
       card.addEventListener("keydown", (e) => {
         if(e.key === "Enter" || e.key === " "){ e.preventDefault(); open(); }
       });
     });
+
+    if(shown.length === 0){
+      grid.innerHTML = `<p class="muted">No hay piezas para esta selección.</p>`;
+    }
   }
 
   if(filter){
+    // Ensure your dropdown values match: all | available | made_to_order
     filter.addEventListener("change", apply);
   }
-  apply();
+
+  // initial render (if pills didn’t already call apply)
+  if(!pills.length) apply();
 
   // modal handlers
   $("#modalBackdrop")?.addEventListener("click", (e) => {
