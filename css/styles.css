@@ -41,6 +41,11 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
 .brand{display:flex;align-items:center;gap:12px;min-width:220px}
 .brandmark{display:flex;align-items:center;text-decoration:none}
 .logo{width:38px;height:38px;display:block}
+/* Bigger logo on Runway */
+.logo-lg { width: 152px; height: 152px; } /* ~4x */
+@media (max-width: 560px){
+  .logo-lg { width: 96px; height: 96px; }
+}
 .brandtext h1{margin:0;font-size:16px;letter-spacing:.2px}
 .brandtext .muted{display:block;margin-top:2px}
 
