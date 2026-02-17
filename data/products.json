@@ -1,19 +1,19 @@
 [
   {
-    "id": "arena",
-    "name": "Arena Negra",
-    "subtitle": "Detalle dorado",
-    "materials": "Hilo + detalle",
-    "sizes": "S / M",
+    "id": "batz-mono-dredd",
+    "collection": "Nahual",
+    "category": "women",
+    "name": "B’atz Mono Dredd",
+    "subtitle": "Colección Nahual",
+    "materials": "Hilo crudo natural + hilo mercerizado café tierra",
+    "sizes": "S/M",
+    "technique": "Ganchillo",
     "status": "loom",
-    "price": {
-      "mode": "hidden",
-      "value": 80,
-      "currency": "USD"
-    },
-    "description": "Top de crochet con detalle de brillo sutil.",
+    "hours": 98,
+    "price": { "mode": "hidden", "value": 350, "currency": "USD" },
     "images": [
-      "assets/images/arena-arena.jpg"
-    ]
+      "assets/images/nahual-batz.jpg"
+    ],
+    "description": "Pieza tejida a mano. Disponible bajo consulta; se puede elaborar a pedido."
   }
 ]
