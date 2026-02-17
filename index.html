@@ -12,7 +12,7 @@
     <div class="container topbar-inner">
       <div class="brand">
         <a class="brandmark" href="./index.html" aria-label="Inicio">
-          <img class="logo" src="assets/images/logo.svg" alt="Kathia Galindo">
+          <img class="logo logo-lg" src="assets/images/logo.svg" alt="Kathia Galindo">
         </a>
         <div class="brandtext">
           <h1 id="brandName">Kathia Galindo</h1>
@@ -30,7 +30,6 @@
   <main class="container">
     <section class="hero">
       <div class="hero-media">
-        <!-- Optional hero image via data/config.json -> heroImage -->
         <img id="heroImg" alt="" style="display:none" onload="this.style.display='block'">
       </div>
 
@@ -43,7 +42,7 @@
       </div>
     </section>
 
-    <!-- Visual menu -->
+    <!-- Categorías: keep ONLY the dropdown -->
     <section class="section">
       <div class="section-title">
         <h3>Categorías</h3>
@@ -57,36 +56,12 @@
           </select>
         </div>
       </div>
-
-      <div class="category-grid" id="categoryCards" aria-label="Categorías principales">
-        <button class="category-card" type="button" data-cat="women">
-          <div class="category-title">Mujer</div>
-          <div class="category-sub">Vestuario y piezas de autor</div>
-        </button>
-
-        <button class="category-card" type="button" data-cat="men">
-          <div class="category-title">Hombre</div>
-          <div class="category-sub">Línea de caballero</div>
-        </button>
-
-        <button class="category-card" type="button" data-cat="accessory">
-          <div class="category-title">Accesorios</div>
-          <div class="category-sub">Detalles y complementos</div>
-        </button>
-      </div>
     </section>
 
+    <!-- Colección: remove Disponibilidad dropdown -->
     <section class="section">
       <div class="section-title">
         <h3>Colección</h3>
-        <div class="controls">
-          <label class="small muted" for="statusFilter">Disponibilidad</label>
-          <select id="statusFilter" class="input pillselect">
-            <option value="all">Todas</option>
-            <option value="available">Disponible</option>
-            <option value="loom">Hecho a pedido</option>
-          </select>
-        </div>
       </div>
 
       <div id="grid" class="grid" aria-live="polite"></div>
@@ -123,6 +98,7 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
   <script src="./js/app.js"></script>
 </body>
 </html>
