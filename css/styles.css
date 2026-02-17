@@ -310,3 +310,16 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
   .hero-media{height:200px}
   .hero-copy h2{font-size:28px}
 }
+/* =========================
+   WIDER BACKSTAGE (Desktop)
+========================= */
+
+body[data-page="admin"] .container {
+  max-width: 1400px;   /* was probably ~1100 */
+}
+
+@media (min-width: 1400px) {
+  body[data-page="admin"] .container {
+    max-width: 1600px;
+  }
+}
