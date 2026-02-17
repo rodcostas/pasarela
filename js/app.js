@@ -14,7 +14,7 @@ function escapeHtml(s){
 function statusBadge(status, labels){
   const map = {
     available: {cls:"", text: labels.available},
-    loom: {cls:"loom", text: labels.loom},     // UI = Hecho a pedido
+    loom: {cls:"loom", text: labels.loom},     // UI: Hecho a pedido
     archived: {cls:"archived", text: labels.archived}
   };
   const v = map[status] || map.available;
@@ -69,7 +69,7 @@ function openModal(p, config){
 
   const contact = contactUrl(p, config);
 
-  // price display logic
+  // price display logic (allow storing internal ref even if hidden)
   let priceLine = "";
   if(p.price?.mode === "visible" && typeof p.price.value === "number"){
     priceLine = `<span class="pill">${escapeHtml(p.price.currency || "USD")} ${p.price.value}</span>`;
@@ -77,7 +77,7 @@ function openModal(p, config){
     priceLine = `<span class="pill">Precio: bajo consulta</span>`;
   }
 
-  // OPTIONAL extra fields (won't break older JSON)
+  // optional extra fields (won't break old JSON)
   const technique = p.technique ? `<span class="pill">${escapeHtml(p.technique)}</span>` : "";
   const hours = Number.isFinite(p.hours) ? `<span class="pill">${p.hours} horas</span>` : "";
 
@@ -115,36 +115,31 @@ async function initRunway(){
     loadJSON("./data/products.json")
   ]);
 
-  // Brand header
-  const brand = $("#brandName");
-  const subtitle = $("#brandSubtitle");
-  if(brand) brand.textContent = config.brandName || "Kathia Galindo";
-  if(subtitle) subtitle.textContent = config.brandSubtitle || "Digital Showroom";
+  // Header text
+  $("#brandName") && ($("#brandName").textContent = config.brandName || "Kathia Galindo");
+  $("#brandSubtitle") && ($("#brandSubtitle").textContent = config.brandSubtitle || "Digital Showroom");
 
   // Hero image optional
   const heroImg = $("#heroImg");
   if(heroImg && config.heroImage) heroImg.src = config.heroImage;
 
   // Hero copy optional
-  $("#collectionTitle") && ( $("#collectionTitle").textContent = config.collectionTitle || "Colección" );
-  $("#collectionSubtitle") && ( $("#collectionSubtitle").textContent = config.collectionSubtitle || "Moda de autor · Hecho en El Salvador." );
+  $("#collectionTitle") && ($("#collectionTitle").textContent = config.collectionTitle || "Colección");
+  $("#collectionSubtitle") && ($("#collectionSubtitle").textContent = config.collectionSubtitle || "Moda de autor · Hecho en El Salvador.");
 
-  // Labels
+  // Labels (Option A)
   const labels = config.labels || {
     available:"Disponible",
     loom:"Hecho a pedido",
     archived:"Archivo"
   };
 
-  // Controls
   const statusFilter = $("#statusFilter");
   const categoryFilter = $("#categoryFilter");
   const grid = $("#grid");
-
   const list = products.slice();
 
-  // Helper: category from product
-  const getCat = (p) => (p.category || "women"); // default to women if missing
+  const getCat = (p) => (p.category || "women");
 
   function apply(){
     const statusV = statusFilter?.value || "all";
@@ -152,12 +147,15 @@ async function initRunway(){
 
     let shown = list;
 
-    // Hide archived by default on Runway
+    // hide archived on Runway
     shown = shown.filter(p => p.status !== "archived");
 
+    // category
     if(catV !== "all"){
       shown = shown.filter(p => getCat(p) === catV);
     }
+
+    // availability
     if(statusV !== "all"){
       shown = shown.filter(p => p.status === statusV);
     }
@@ -167,6 +165,7 @@ async function initRunway(){
     $$(".card", grid).forEach(card => {
       const id = card.getAttribute("data-id");
       const p = list.find(x => x.id === id);
+      if(!p) return;
       const open = () => openModal(p, config);
       card.addEventListener("click", open);
       card.addEventListener("keydown", (e) => {
@@ -175,15 +174,12 @@ async function initRunway(){
     });
   }
 
-  // Visual menu (cards) -> set category filter
+  // category menu cards
   $$(".category-card", $("#categoryCards")).forEach(btn => {
     btn.addEventListener("click", () => {
       const cat = btn.getAttribute("data-cat");
-      if(categoryFilter){
-        categoryFilter.value = cat;
-      }
+      if(categoryFilter) categoryFilter.value = cat;
       apply();
-      // scroll to collection grid (nice UX)
       grid?.scrollIntoView({behavior:"smooth", block:"start"});
     });
   });
@@ -193,7 +189,7 @@ async function initRunway(){
 
   apply();
 
-  // Modal handlers
+  // modal close handlers
   $("#modalBackdrop")?.addEventListener("click", (e) => {
     if(e.target.id === "modalBackdrop") closeModal();
   });
@@ -204,7 +200,7 @@ async function initRunway(){
     if(e.target && e.target.id === "closeModalBtn") closeModal();
   });
 
-  // Primary CTA
+  // primary CTA
   const cta = $("#primaryCTA");
   if(cta){
     cta.href = contactUrl({name:"una pieza"}, config);
