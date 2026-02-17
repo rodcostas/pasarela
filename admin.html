@@ -26,11 +26,14 @@
   <main class="container bs-shell">
     <div class="bs-title">
       <div>
-        <h2>Gestión de prendas</h2>
-        <div class="small muted">Actualiza tu catálogo aquí. Para publicar cambios, descargas el archivo y lo reemplazas en <strong>/data/products.json</strong>.</div>
+        <h2>Gestión de catálogo</h2>
+        <div class="small muted">
+          Actualiza tu catálogo aquí. Para publicar cambios, descarga el archivo y reemplázalo en
+          <strong>/data/products.json</strong>.
+        </div>
       </div>
       <div class="row">
-        <button class="btn primary" id="newBtn" type="button">Nueva prenda</button>
+        <button class="btn primary" id="newBtn" type="button">Nueva pieza</button>
         <button class="btn" id="downloadBtn" type="button">Descargar catálogo</button>
       </div>
     </div>
@@ -38,9 +41,9 @@
     <!-- Mobile-first: editor first, then catálogo -->
     <div class="grid bs-grid">
       <!-- Editor -->
-      <section class="pane" id="editor" aria-label="Editor de prenda">
+      <section class="pane" id="editor" aria-label="Editor de pieza">
         <div class="spread">
-          <strong id="edTitle">Editar prenda</strong>
+          <strong id="edTitle">Editar pieza</strong>
           <span class="small muted">Backstage</span>
         </div>
 
@@ -49,33 +52,67 @@
         <div class="formgrid">
           <div>
             <div class="label">ID (slug)</div>
-            <input class="input" id="f_id" placeholder="arena-negra" />
+            <input class="input" id="f_id" placeholder="batz-mono-dredd" />
           </div>
+
+          <div>
+            <div class="label">Colección</div>
+            <input class="input" id="f_collection" placeholder="Nahual" />
+          </div>
+
+          <div>
+            <div class="label">Categoría</div>
+            <select class="input" id="f_category">
+              <option value="women">Mujer</option>
+              <option value="men">Hombre</option>
+              <option value="accessory">Accesorio</option>
+            </select>
+          </div>
+
           <div>
             <div class="label">Nombre</div>
-            <input class="input" id="f_name" placeholder="Arena Negra" />
+            <input class="input" id="f_name" placeholder="B’atz Mono Dredd" />
           </div>
 
           <div>
             <div class="label">Subtítulo</div>
-            <input class="input" id="f_subtitle" placeholder="Detalle dorado" />
+            <input class="input" id="f_subtitle" placeholder="Colección Nahual" />
           </div>
+
           <div>
             <div class="label">Materiales</div>
-            <input class="input" id="f_materials" placeholder="Algodón / tejido artesanal" />
+            <input class="input" id="f_materials" placeholder="Hilo crudo natural + hilo mercerizado..." />
           </div>
 
           <div>
             <div class="label">Talla o medidas</div>
-            <input class="input" id="f_sizes" placeholder="S / M" />
+            <input class="input" id="f_sizes" placeholder="S/M" />
           </div>
+
+          <div>
+            <div class="label">Técnica</div>
+            <select class="input" id="f_technique">
+              <option value="Ganchillo">Ganchillo</option>
+              <option value="Bordado">Bordado</option>
+              <option value="Corte láser">Corte láser</option>
+              <option value="Intervención artesanal">Intervención artesanal</option>
+            </select>
+          </div>
+
           <div>
             <div class="label">Disponibilidad</div>
             <select class="input" id="f_status">
               <option value="available">Disponible</option>
-              <option value="loom">En Telar</option>
+              <!-- mantenemos el value "loom" para compatibilidad con el demo existente -->
+              <option value="loom">Hecho a pedido</option>
+              <!-- opcional: puedes ocultarlo luego en admin.js si la confunde -->
               <option value="archived">Archivo</option>
             </select>
+          </div>
+
+          <div>
+            <div class="label">Horas de elaboración</div>
+            <input class="input" id="f_hours" type="number" min="0" step="1" placeholder="98" />
           </div>
 
           <div>
@@ -85,6 +122,7 @@
               <option value="visible">Visible</option>
             </select>
           </div>
+
           <div>
             <div class="label">Precio (valor)</div>
             <input class="input" id="f_price_value" type="number" min="0" step="1" value="0" />
@@ -136,7 +174,7 @@
 
       <!-- Catálogo -->
       <section aria-label="Catálogo">
-        <table class="table" aria-label="Listado de prendas">
+        <table class="table" aria-label="Listado de piezas">
           <tbody id="tableBody"></tbody>
         </table>
       </section>
