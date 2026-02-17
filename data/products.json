@@ -1,7 +1,7 @@
 [
   {
     "id": "batz-mono-dredd",
-    "collection": "Nahual",
+    "collection": "NAHUAL",
     "category": "women",
     "name": "B’atz Mono Dredd",
     "subtitle": "Colección Nahual",
@@ -14,6 +14,40 @@
     "images": [
       "assets/images/nahual-batz.jpeg"
     ],
-    "description": "Pieza tejida a mano. Disponible bajo consulta; se puede elaborar a pedido."
+    "description": "Pieza elaborada completamente a mano en ganchillo. Cada diseño requiere aproximadamente 98 horas laborales. Disponible hecho a pedido. Posibilidad de ajustes personalizados bajo consulta."
+  },
+  {
+    "id": "nahual-runway-hombre-01",
+    "collection": "NAHUAL",
+    "category": "men",
+    "name": "Look Nahual Runway",
+    "subtitle": "Edición Pasarela",
+    "materials": "Textiles intervenidos artesanalmente",
+    "sizes": "Bajo consulta",
+    "technique": "Intervención artesanal",
+    "status": "available",
+    "hours": null,
+    "price": { "mode": "hidden", "value": null, "currency": "USD" },
+    "images": [
+      "assets/images/hombre.png"
+    ],
+    "description": "Look masculino presentado en pasarela como parte de la colección Nahual. Integra texturas artesanales y silueta contemporánea, fusionando tradición textil con estética editorial. Disponible bajo consulta para producción personalizada."
+  },
+  {
+    "id": "nahual-cinturon-obsidiana-01",
+    "collection": "NAHUAL",
+    "category": "accessory",
+    "name": "Cinturón Obsidiana Trenzado",
+    "subtitle": "Accesorio artesanal",
+    "materials": "Metal intervenido artesanalmente",
+    "sizes": "Bajo consulta",
+    "technique": "Intervención artesanal",
+    "status": "available",
+    "hours": null,
+    "price": { "mode": "visible", "value": 350, "currency": "USD" },
+    "images": [
+      "assets/images/accesorio.png"
+    ],
+    "description": "Cinturón escultórico con textura orgánica trabajada manualmente. Cada pieza presenta variaciones naturales que la hacen única. Diseñado para elevar estilismos contemporáneos con un gesto de carácter y sofisticación."
   }
 ]
