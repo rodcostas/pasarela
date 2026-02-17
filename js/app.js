@@ -11,22 +11,10 @@ function escapeHtml(s){
   return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
-/**
- * Normalize legacy fields so old data keeps working.
- * - status: loom -> made_to_order
- * - category: default women if missing
- */
-function normalizeProduct(p){
-  const status = (p.status === "loom") ? "made_to_order" : (p.status || "available");
-  const category = p.category || "women"; // women | men | accessories
-  return { ...p, status, category };
-}
-
 function statusBadge(status, labels){
   const map = {
     available: {cls:"", text: labels.available},
-    made_to_order: {cls:"made", text: labels.made_to_order},
-    // keep archived supported for later; not shown unless used
+    loom: {cls:"loom", text: labels.loom},     // UI = Hecho a pedido
     archived: {cls:"archived", text: labels.archived}
   };
   const v = map[status] || map.available;
@@ -71,22 +59,27 @@ function openModal(p, config){
   const panel = $("#modalPanel");
 
   const labels = config.labels || {
-    available: "Disponible",
-    made_to_order: "Hecho a pedido",
-    archived: "Archivo"
+    available:"Disponible",
+    loom:"Hecho a pedido",
+    archived:"Archivo"
   };
 
   const img = p.images?.[0] || "";
   media.innerHTML = img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : "";
+
   const contact = contactUrl(p, config);
 
   // price display logic
   let priceLine = "";
   if(p.price?.mode === "visible" && typeof p.price.value === "number"){
     priceLine = `<span class="pill">${escapeHtml(p.price.currency || "USD")} ${p.price.value}</span>`;
-  }else if(p.price?.mode === "hidden"){
+  } else if(p.price?.mode === "hidden"){
     priceLine = `<span class="pill">Precio: bajo consulta</span>`;
   }
+
+  // OPTIONAL extra fields (won't break older JSON)
+  const technique = p.technique ? `<span class="pill">${escapeHtml(p.technique)}</span>` : "";
+  const hours = Number.isFinite(p.hours) ? `<span class="pill">${p.hours} horas</span>` : "";
 
   panel.innerHTML = `
     <h4>${escapeHtml(p.name)}</h4>
@@ -95,6 +88,8 @@ function openModal(p, config){
       ${statusBadge(p.status, labels)}
       ${p.materials ? `<span class="pill">${escapeHtml(p.materials)}</span>` : ""}
       ${p.sizes ? `<span class="pill">${escapeHtml(p.sizes)}</span>` : ""}
+      ${technique}
+      ${hours}
       ${priceLine}
     </div>
     <div class="modal-actions">
@@ -115,102 +110,90 @@ function closeModal(){
 }
 
 async function initRunway(){
-  const [config, productsRaw] = await Promise.all([
+  const [config, products] = await Promise.all([
     loadJSON("./data/config.json"),
     loadJSON("./data/products.json")
   ]);
 
-  // Title (if you still use these IDs elsewhere)
+  // Brand header
   const brand = $("#brandName");
   const subtitle = $("#brandSubtitle");
   if(brand) brand.textContent = config.brandName || "Kathia Galindo";
-  if(subtitle) subtitle.textContent = config.runwayTitle || "";
+  if(subtitle) subtitle.textContent = config.brandSubtitle || "Digital Showroom";
 
-  // hero image optional
+  // Hero image optional
   const heroImg = $("#heroImg");
   if(heroImg && config.heroImage) heroImg.src = config.heroImage;
 
-  // labels (new)
+  // Hero copy optional
+  $("#collectionTitle") && ( $("#collectionTitle").textContent = config.collectionTitle || "Colección" );
+  $("#collectionSubtitle") && ( $("#collectionSubtitle").textContent = config.collectionSubtitle || "Moda de autor · Hecho en El Salvador." );
+
+  // Labels
   const labels = config.labels || {
-    available: "Disponible",
-    made_to_order: "Hecho a pedido",
-    archived: "Archivo"
+    available:"Disponible",
+    loom:"Hecho a pedido",
+    archived:"Archivo"
   };
 
-  const filter = $("#statusFilter");
+  // Controls
+  const statusFilter = $("#statusFilter");
+  const categoryFilter = $("#categoryFilter");
   const grid = $("#grid");
 
-  // Normalize legacy products
-  const list = productsRaw.map(normalizeProduct);
+  const list = products.slice();
 
-  // Category pills (from index.html)
-  const pills = $$(".pill");
-  let activeCategory = document.body.dataset.category || "women";
-
-  function setActiveCategory(cat){
-    activeCategory = cat || "women";
-    document.body.dataset.category = activeCategory;
-
-    // update aria states (if pills exist)
-    pills.forEach(p => {
-      const on = p.dataset.category === activeCategory;
-      p.classList.toggle("active", on);
-      p.setAttribute("aria-selected", on ? "true" : "false");
-    });
-
-    apply();
-  }
-
-  // Listen to pill clicks
-  if(pills.length){
-    pills.forEach(btn => {
-      btn.addEventListener("click", () => setActiveCategory(btn.dataset.category));
-    });
-    // ensure one is active on load
-    const initial = pills.find(p => p.dataset.category === activeCategory) || pills[0];
-    if(initial) setActiveCategory(initial.dataset.category);
-  }
+  // Helper: category from product
+  const getCat = (p) => (p.category || "women"); // default to women if missing
 
   function apply(){
-    const v = filter?.value || "all";
+    const statusV = statusFilter?.value || "all";
+    const catV = categoryFilter?.value || "all";
 
-    // first: category filter
-    let shown = list.filter(p => p.category === activeCategory);
+    let shown = list;
 
-    // second: status filter
-    if(v !== "all"){
-      shown = shown.filter(p => p.status === v);
+    // Hide archived by default on Runway
+    shown = shown.filter(p => p.status !== "archived");
+
+    if(catV !== "all"){
+      shown = shown.filter(p => getCat(p) === catV);
+    }
+    if(statusV !== "all"){
+      shown = shown.filter(p => p.status === statusV);
     }
 
     grid.innerHTML = shown.map(p => renderCard(p, labels)).join("");
 
-    // attach handlers
     $$(".card", grid).forEach(card => {
       const id = card.getAttribute("data-id");
-      const p = shown.find(x => x.id === id) || list.find(x => x.id === id);
-      if(!p) return;
-
+      const p = list.find(x => x.id === id);
       const open = () => openModal(p, config);
       card.addEventListener("click", open);
       card.addEventListener("keydown", (e) => {
         if(e.key === "Enter" || e.key === " "){ e.preventDefault(); open(); }
       });
     });
-
-    if(shown.length === 0){
-      grid.innerHTML = `<p class="muted">No hay piezas para esta selección.</p>`;
-    }
   }
 
-  if(filter){
-    // Ensure your dropdown values match: all | available | made_to_order
-    filter.addEventListener("change", apply);
-  }
+  // Visual menu (cards) -> set category filter
+  $$(".category-card", $("#categoryCards")).forEach(btn => {
+    btn.addEventListener("click", () => {
+      const cat = btn.getAttribute("data-cat");
+      if(categoryFilter){
+        categoryFilter.value = cat;
+      }
+      apply();
+      // scroll to collection grid (nice UX)
+      grid?.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
 
-  // initial render (if pills didn’t already call apply)
-  if(!pills.length) apply();
+  statusFilter?.addEventListener("change", apply);
+  categoryFilter?.addEventListener("change", apply);
 
-  // modal handlers
+  apply();
+
+  // Modal handlers
   $("#modalBackdrop")?.addEventListener("click", (e) => {
     if(e.target.id === "modalBackdrop") closeModal();
   });
@@ -221,7 +204,7 @@ async function initRunway(){
     if(e.target && e.target.id === "closeModalBtn") closeModal();
   });
 
-  // primary CTA
+  // Primary CTA
   const cta = $("#primaryCTA");
   if(cta){
     cta.href = contactUrl({name:"una pieza"}, config);
