@@ -3,17 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Runway • Digital Showroom</title>
+  <title>Runway • Kathia Galindo</title>
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
 
 <body data-page="runway">
   <header class="topbar">
     <div class="container topbar-inner">
-      <div class="brand">
-        <h1 id="brandName">Showroom</h1>
-        <span class="small muted" id="brandSubtitle"></span>
-      </div>
+      <a class="brand" href="./index.html" aria-label="Kathia Galindo">
+        <img class="brand-logo" src="assets/images/logo.svg" alt="Kathia Galindo" />
+        <div class="brand-text">
+          <div class="brand-name">Kathia Galindo</div>
+          <div class="brand-sub">Diseño artesanal contemporáneo</div>
+        </div>
+      </a>
+
       <nav class="nav">
         <a class="active" href="./index.html">Runway</a>
         <a class="btn primary" id="primaryCTA" href="#" target="_blank" rel="noopener">Contactar</a>
@@ -24,7 +28,6 @@
   <main class="container">
     <section class="hero">
       <div class="hero-media">
-        <!-- Optional hero image via data/config.json -> heroImage -->
         <img id="heroImg" alt="" style="display:none" onload="this.style.display='block'">
       </div>
 
@@ -37,34 +40,57 @@
       </div>
     </section>
 
+    <!-- NEW: Visual menu -->
+    <section class="section">
+      <div class="section-title">
+        <h3>Explorar</h3>
+        <div class="controls">
+          <label class="small muted" for="statusFilter">Disponibilidad</label>
+          <select id="statusFilter" class="input input-pill">
+            <option value="all">Todas</option>
+            <option value="available">Disponible</option>
+            <option value="made_to_order">Hecho a pedido</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pillbar" role="tablist" aria-label="Categorías">
+        <button class="pill active" type="button" data-category="women" role="tab" aria-selected="true">
+          Mujer
+        </button>
+        <button class="pill" type="button" data-category="men" role="tab" aria-selected="false">
+          Hombre
+        </button>
+        <button class="pill" type="button" data-category="accessories" role="tab" aria-selected="false">
+          Accesorios
+        </button>
+      </div>
+
+      <p class="helper muted">
+        Selecciona una categoría para descubrir piezas disponibles o hechas a pedido.
+      </p>
+    </section>
+
     <section class="section">
       <div class="section-title">
         <h3>Colección</h3>
-        <div class="controls">
-          <label class="small muted" for="statusFilter">Filtrar</label>
-          <select id="statusFilter" class="input" style="padding:8px 10px;border-radius:999px">
-            <option value="all">Todas</option>
-            <option value="available">Disponible</option>
-            <option value="loom">En Telar</option>
-            <option value="archived">Archivo</option>
-          </select>
-        </div>
       </div>
 
       <div id="grid" class="grid" aria-live="polite"></div>
     </section>
 
-<footer class="footer">
-  <div style="text-align:center; line-height:1.6;">
-    <div>
-      © <span id="year"></span> 
-      Kathia Galindo · Artesano acreditado · Diseñador
-    </div>
-    <div class="muted" style="margin-top:6px;">
-      Web design & digital direction © 2026 Aurea Studios
-    </div>
-  </div>
-</footer>
+    <footer class="footer">
+      <div style="text-align:center; line-height:1.6;">
+        <div>
+          © <span id="year"></span>
+          Kathia Galindo · Artesano acreditado · Diseñadora
+        </div>
+        <div class="muted" style="margin-top:6px;">
+          Web design & digital direction © 2026 Aurea Studios
+        </div>
+      </div>
+    </footer>
+  </main>
 
   <!-- Modal -->
   <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
@@ -85,5 +111,25 @@
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
   <script src="./js/app.js"></script>
+
+  <!-- Tiny front-menu behavior (visual only + ready for app.js hook) -->
+  <script>
+    (function () {
+      const pills = Array.from(document.querySelectorAll(".pill"));
+      const setActive = (btn) => {
+        pills.forEach(p => {
+          const active = p === btn;
+          p.classList.toggle("active", active);
+          p.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        // This line is the hook we’ll use in app.js next:
+        document.body.dataset.category = btn.dataset.category;
+      };
+
+      pills.forEach(btn => btn.addEventListener("click", () => setActive(btn)));
+      // default:
+      if (pills[0]) setActive(pills[0]);
+    })();
+  </script>
 </body>
 </html>
