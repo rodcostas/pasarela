@@ -10,15 +10,22 @@
 <body data-page="admin">
   <header class="topbar">
     <div class="container topbar-inner">
+      <!-- Brand: use logo, remove big "Kathia G." text from admin topbar -->
       <div class="brand">
-        <h1 id="brandName">Showroom</h1>
-        <span class="small muted" id="brandSubtitle"></span>
+        <a class="brandmark" href="./index.html" target="_blank" rel="noopener" aria-label="Abrir Runway en una pestaña nueva">
+          <img class="logo" src="assets/images/logo.svg" alt="Kathia Galindo">
+        </a>
+        <div class="brandtext">
+          <h1 id="brandName">Kathia Galindo</h1>
+          <span class="small muted" id="brandSubtitle">Backstage</span>
+        </div>
       </div>
 
       <nav class="nav">
-        <a href="./index.html">Runway</a>
+        <!-- Runway should open in new tab -->
+        <a href="./index.html" target="_blank" rel="noopener">Runway</a>
         <a class="active" href="./admin.html">Backstage</a>
-        <a class="btn primary" id="primaryCTA" href="#" target="_blank" rel="noopener">Contactar</a>
+        <!-- remove Contactar button from Backstage -->
       </nav>
     </div>
   </header>
@@ -103,9 +110,8 @@
             <div class="label">Disponibilidad</div>
             <select class="input" id="f_status">
               <option value="available">Disponible</option>
-              <!-- mantenemos el value "loom" para compatibilidad con el demo existente -->
+              <!-- keep value "loom" for compatibility -->
               <option value="loom">Hecho a pedido</option>
-              <!-- opcional: puedes ocultarlo luego en admin.js si la confunde -->
               <option value="archived">Archivo</option>
             </select>
           </div>
